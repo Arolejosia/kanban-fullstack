@@ -4,10 +4,10 @@
   "description": "Mon projet Kanban avec React, Express et PostgreSQL.",
   "main": "src/backend/server.js",
   "scripts": {
-    "install:backend": "npm install --prefix src/backend",
-    "install:frontend": "npm install --prefix src/frontend",
+    "install:backend": "npm install --prefix backend",
+    "install:frontend": "npm install --prefix frontend",
     "install": "npm run install:backend && npm run install:frontend",
-    "build": "npm run install:frontend && npm run build --prefix src/frontend",
+    "build": "npm run install:frontend && npm run build --prefix frontend",
     "start": "node src/backend/server.js"
   },
   "keywords": [],
@@ -18,4 +18,3 @@
   },
   "dependencies": {}
 }
-
