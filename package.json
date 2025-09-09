@@ -2,13 +2,13 @@
   "name": "kanban-fullstack",
   "version": "1.0.0",
   "description": "Mon projet Kanban avec React, Express et PostgreSQL.",
-  "main": "backend/server.js",
+  "main": "src/backend/server.js",
   "scripts": {
     "install:backend": "npm install --prefix backend",
     "install:frontend": "npm install --prefix frontend",
     "install": "npm run install:backend && npm run install:frontend",
     "build": "npm run install:frontend && npm run build --prefix frontend",
-    "start": "node backend/server.js"
+    "start": "node src/backend/server.js"
   },
   "keywords": [],
   "author": "",
