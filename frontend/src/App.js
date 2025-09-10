@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // --- Helper function for API calls ---
 const apiCall = async (url, method = 'GET', body = null, token = null) => {
@@ -132,7 +133,6 @@ function App() {
   // Notifications state
   const [notifications, setNotifications] = useState([]);
 
- const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   // --- Effects ---
   useEffect(() => {
