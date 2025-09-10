@@ -1,56 +1,59 @@
-// --- Dépendances ---
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import pkg from 'pg';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+dotenv.config();
+const { Pool } = pkg;
+
+// Fix pour __dirname en ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // --- Configuration ---
 const app = express();
-// Le port sera fourni par Render en production, sinon 5000 en local
 const PORT = process.env.PORT || 5000;
-// Il est crucial de mettre ceci dans les variables d'environnement sur Render
 const JWT_SECRET = process.env.JWT_SECRET || 'votre-super-secret-long-et-complexe';
+
 // --- Middlewares ---
 app.use(cors());
 app.use(express.json());
 
 // --- Connexion PostgreSQL ---
-// REMPLACEZ AVEC VOS PROPRES IDENTIFIANTS
-// --- Connexion PostgreSQL (Adaptée pour Render) ---
-const pool = new Pool({
-  // Render fournit cette variable d'environnement avec tous les identifiants
-  connectionString: process.env.DATABASE_URL,
-  // En production (sur Render), on active le SSL
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      }
+    : {
+        user: process.env.DB_USER || 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        database: process.env.DB_NAME || 'kanban_app',
+        password: process.env.DB_PASSWORD || 'password',
+        port: process.env.DB_PORT || 5432,
+        ssl: false,
+      }
+);
 
-
-// Test de la connexion à la base de données au démarrage
 pool.connect((err, client, release) => {
   if (err) {
     console.error('❌ ERREUR DE CONNEXION À LA BASE DE DONNÉES:', err.stack);
-    console.error('---');
-    console.error('🛑 VÉRIFIEZ VOS IDENTIFIANTS (user, password, database) DANS server.js');
-    console.error('---');
     return;
   }
-  console.log('✅ Connexion à la base de données PostgreSQL réussie !');
+  console.log('✅ Connexion PostgreSQL réussie !');
   client.release();
 });
 
-// --- SERVIR LE FRONTEND REACT EN PRODUCTION ---
-// On sert les fichiers statiques (HTML, CSS, JS) depuis le dossier 'public'
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-
-// --- Middleware d'authentification (INCHANGÉ) ---
+// --- Middleware d’auth ---
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-
-  if (token == null) return res.sendStatus(401);
+  if (!token) return res.sendStatus(401);
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
@@ -59,12 +62,14 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-
-
 // --- Route de test ---
-app.get('/', (req, res) => {
-  console.log('ℹ️ Requête reçue sur /');
-  res.send('🎉 Le serveur backend Kanban est en ligne !');
+app.get('/api/health', (req, res) => {
+  console.log('ℹ️ Requête reçue sur /api/health');
+  res.json({ 
+    status: '🎉 Le serveur backend Kanban est en ligne !',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // --- Routes d'Authentification ---
@@ -335,13 +340,18 @@ app.post('/api/tasks/:id/mark-reminder-sent', authenticateToken, async (req, res
     }
 });
 
-
 // --- CATCH-ALL POUR LE ROUTAGE REACT ---
 // Cette route doit être la DERNIÈRE. Elle renvoie l'app React pour toute requête non-API.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+app.get('/*', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  } else {
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  }
 });
+
 // --- Démarrage ---
 app.listen(PORT, () => {
-  console.log(`🚀 Serveur backend démarré sur http://localhost:${PORT}`);
+  console.log(`🚀 Backend démarré sur http://localhost:${PORT}`);
+  console.log(`🌍 Mode: ${process.env.NODE_ENV || 'development'}`);
 });

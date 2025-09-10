@@ -1,20 +1,22 @@
 {
   "name": "kanban-fullstack",
   "version": "1.0.0",
-  "description": "Mon projet Kanban avec React, Express et PostgreSQL.",
+  "description": "Application Kanban fullstack",
   "main": "backend/server.js",
   "scripts": {
     "install:backend": "npm install --prefix backend",
     "install:frontend": "npm install --prefix frontend",
     "install": "npm run install:backend && npm run install:frontend",
-    "build": "npm run install:frontend && npm run build --prefix frontend",
-    "start": "node backend/server.js"
+    "build": "npm run build --prefix frontend",
+    "start": "node backend/server.js",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
+    "test": "npm test --prefix frontend"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
 }
