@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 dotenv.config();
 const { Pool } = pkg;
 
+
 // Fix pour __dirname en ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,7 +21,10 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'votre-super-secret-long-et-complexe';
 
 // --- Middlewares ---
-app.use(cors());
+app.use(cors({
+  // Remplacez par l'URL principale de votre site Netlify
+  origin: 'https://modernekanban.netlify.app' 
+}));
 app.use(express.json());
 
 // --- Connexion PostgreSQL ---
