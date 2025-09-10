@@ -340,15 +340,6 @@ app.post('/api/tasks/:id/mark-reminder-sent', authenticateToken, async (req, res
     }
 });
 
-// --- CATCH-ALL POUR LE ROUTAGE REACT ---
-// Cette route doit être la DERNIÈRE. Elle renvoie l'app React pour toute requête non-API.
-app.get('/*', (req, res) => {
-  if (process.env.NODE_ENV === 'production') {
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-  } else {
-    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-  }
-});
 
 // --- Démarrage ---
 app.listen(PORT, () => {
